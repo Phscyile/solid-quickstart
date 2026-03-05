@@ -72,8 +72,16 @@ export default async (req: Request, context: { cookies: any }) => {
     }
 
     const nameInput = String(body?.name || '').trim();
+    const unitInput = String(body?.unit || '').trim();
+    const contactInput = String(body?.contact || '').trim();
     const name = nameInput.length > 0 ? nameInput.slice(0, 80) : `Investigator ${badge}`;
-    const investigator = await createInvestigator({ badge, name, password });
+    const investigator = await createInvestigator({
+      badge,
+      name,
+      unit: unitInput.slice(0, 80),
+      contact: contactInput.slice(0, 120),
+      password,
+    });
     const sessionId = await createSession(investigator.badge);
 
     context.cookies.set({
@@ -90,6 +98,8 @@ export default async (req: Request, context: { cookies: any }) => {
       investigator: {
         badge: investigator.badge,
         name: investigator.name,
+        unit: investigator.unit || '',
+        contact: investigator.contact || '',
       },
     });
   }
@@ -115,6 +125,8 @@ export default async (req: Request, context: { cookies: any }) => {
       investigator: {
         badge: investigator.badge,
         name: investigator.name,
+        unit: investigator.unit || '',
+        contact: investigator.contact || '',
       },
     });
   }

@@ -4,8 +4,11 @@ import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 export type InvestigatorRecord = {
   badge: string;
   name: string;
+  unit?: string;
+  contact?: string;
   passwordHash: string;
   createdAt: string;
+  updatedAt: string;
 };
 
 export type CaseRecord = {
@@ -61,21 +64,56 @@ export const getInvestigator = async (badge: string) =>
 export const createInvestigator = async ({
   badge,
   name,
+  unit,
+  contact,
   password,
 }: {
   badge: string;
   name: string;
+  unit?: string;
+  contact?: string;
   password: string;
 }) => {
   const record: InvestigatorRecord = {
     badge,
     name,
+    unit,
+    contact,
     passwordHash: hashPassword(password),
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 
   await investigatorsStore.setJSON(`${INVESTIGATOR_KEY_PREFIX}${badge}`, record);
   return record;
+};
+
+export const updateInvestigator = async ({
+  badge,
+  name,
+  unit,
+  contact,
+}: {
+  badge: string;
+  name?: string;
+  unit?: string;
+  contact?: string;
+}) => {
+  const current = await getInvestigator(badge);
+  if (!current) {
+    return null;
+  }
+
+  const next: InvestigatorRecord = {
+    ...current,
+    name: typeof name === 'string' ? name : current.name,
+    unit: typeof unit === 'string' ? unit : current.unit,
+    contact: typeof contact === 'string' ? contact : current.contact,
+    updatedAt: new Date().toISOString(),
+  };
+
+  await investigatorsStore.setJSON(`${INVESTIGATOR_KEY_PREFIX}${badge}`, next);
+  return next;
 };
 
 export const createSession = async (badge: string) => {

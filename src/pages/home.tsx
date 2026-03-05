@@ -3,6 +3,8 @@ import { For, Match, Show, Switch, createEffect, createMemo, createSignal } from
 type Investigator = {
   badge: string;
   name: string;
+  unit?: string;
+  contact?: string;
 };
 
 type CaseRecord = {
@@ -56,10 +58,15 @@ export default function Home() {
   const [signupName, setSignupName] = createSignal('');
   const [signupBadge, setSignupBadge] = createSignal('');
   const [signupPassword, setSignupPassword] = createSignal('');
+  const [signupUnit, setSignupUnit] = createSignal('');
+  const [signupContact, setSignupContact] = createSignal('');
 
   const [newCaseTitle, setNewCaseTitle] = createSignal('');
   const [newCaseSummary, setNewCaseSummary] = createSignal('');
   const [newCaseAssignedBadges, setNewCaseAssignedBadges] = createSignal('');
+  const [profileName, setProfileName] = createSignal('');
+  const [profileUnit, setProfileUnit] = createSignal('');
+  const [profileContact, setProfileContact] = createSignal('');
 
   const assignedCases = createMemo(() => {
     const currentInvestigator = investigator();
@@ -96,12 +103,24 @@ export default function Home() {
     void loadSession();
   });
 
+  createEffect(() => {
+    const currentInvestigator = investigator();
+    if (!currentInvestigator) {
+      return;
+    }
+    setProfileName(currentInvestigator.name || '');
+    setProfileUnit(currentInvestigator.unit || '');
+    setProfileContact(currentInvestigator.contact || '');
+  });
+
   const clearAuthForm = () => {
     setLoginBadge('');
     setLoginPassword('');
     setSignupBadge('');
     setSignupName('');
     setSignupPassword('');
+    setSignupUnit('');
+    setSignupContact('');
   };
 
   const handleLogin = async (event: SubmitEvent) => {
@@ -138,8 +157,36 @@ export default function Home() {
         body: JSON.stringify({
           action: 'signup',
           name: signupName(),
+          unit: signupUnit(),
+          contact: signupContact(),
           badge: signupBadge(),
           password: signupPassword(),
+        }),
+      });
+      clearAuthForm();
+      await loadSession();
+    } catch (err: any) {
+      setError(err?.message || 'Account creation failed.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleSignupFromLogin = async () => {
+    if (!loginBadge().trim() || !loginPassword().trim()) {
+      setError('Enter badge number and password before creating an account.');
+      return;
+    }
+
+    setBusy(true);
+    setError('');
+    try {
+      await request('/api/portal/auth', {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'signup',
+          badge: loginBadge(),
+          password: loginPassword(),
         }),
       });
       clearAuthForm();
@@ -200,6 +247,27 @@ export default function Home() {
       setNewCaseAssignedBadges('');
     } catch (err: any) {
       setError(err?.message || 'Unable to create case.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleProfileSave = async (event: SubmitEvent) => {
+    event.preventDefault();
+    setBusy(true);
+    setError('');
+    try {
+      const data = await request('/api/portal/me', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          name: profileName(),
+          unit: profileUnit(),
+          contact: profileContact(),
+        }),
+      });
+      setInvestigator(data.investigator);
+    } catch (err: any) {
+      setError(err?.message || 'Failed to save investigator profile.');
     } finally {
       setBusy(false);
     }
@@ -270,6 +338,9 @@ export default function Home() {
               <button class="portal-btn portal-btn-primary" type="submit" disabled={busy()}>
                 {busy() ? 'Logging in...' : 'Log In'}
               </button>
+              <button class="portal-btn" type="button" disabled={busy()} onClick={handleSignupFromLogin}>
+                Create Account with These Credentials
+              </button>
               <button class="portal-btn" type="button" onClick={() => setView('choice')}>
                 Back
               </button>
@@ -287,6 +358,24 @@ export default function Home() {
                 value={signupName()}
                 onInput={(event) => setSignupName(event.currentTarget.value)}
                 placeholder="Detective Jane Doe"
+              />
+            </label>
+            <label>
+              Unit or division
+              <input
+                type="text"
+                value={signupUnit()}
+                onInput={(event) => setSignupUnit(event.currentTarget.value)}
+                placeholder="Major Crimes"
+              />
+            </label>
+            <label>
+              Contact info
+              <input
+                type="text"
+                value={signupContact()}
+                onInput={(event) => setSignupContact(event.currentTarget.value)}
+                placeholder="Radio 3A-12 / Discord"
               />
             </label>
             <label>
@@ -332,6 +421,12 @@ export default function Home() {
               <p>
                 <strong>Badge:</strong> {investigator()?.badge}
               </p>
+              <p>
+                <strong>Unit:</strong> {investigator()?.unit || 'Not set'}
+              </p>
+              <p>
+                <strong>Contact:</strong> {investigator()?.contact || 'Not set'}
+              </p>
               <div class="portal-actions">
                 <button class="portal-btn" onClick={refreshCases}>
                   Refresh Cases
@@ -341,6 +436,38 @@ export default function Home() {
                 </button>
               </div>
             </article>
+
+            <form class="portal-card portal-form" onSubmit={handleProfileSave}>
+              <h2 class="card-title">Update Profile Information</h2>
+              <label>
+                Name
+                <input
+                  type="text"
+                  required
+                  value={profileName()}
+                  onInput={(event) => setProfileName(event.currentTarget.value)}
+                />
+              </label>
+              <label>
+                Unit or division
+                <input
+                  type="text"
+                  value={profileUnit()}
+                  onInput={(event) => setProfileUnit(event.currentTarget.value)}
+                />
+              </label>
+              <label>
+                Contact info
+                <input
+                  type="text"
+                  value={profileContact()}
+                  onInput={(event) => setProfileContact(event.currentTarget.value)}
+                />
+              </label>
+              <button class="portal-btn portal-btn-primary" type="submit" disabled={busy()}>
+                {busy() ? 'Saving...' : 'Save Profile'}
+              </button>
+            </form>
 
             <form class="portal-card portal-form" onSubmit={handleCreateCase}>
               <h2 class="card-title">Start New Case</h2>
