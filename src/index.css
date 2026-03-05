@@ -1,7 +1,113 @@
 @import 'tailwindcss';
 
 @layer base {
-    body {
-        @apply font-sans bg-slate-50;
-    }
+  body {
+    @apply bg-slate-950 text-slate-100;
+    background-image: radial-gradient(circle at 20% 20%, #1e293b 0%, transparent 35%),
+      radial-gradient(circle at 90% 5%, #0f766e 0%, transparent 25%);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  .portal-shell {
+    @apply mx-auto max-w-5xl space-y-5;
+  }
+
+  .portal-header {
+    @apply rounded-2xl border border-slate-700 bg-slate-900/90 p-6 shadow-xl;
+  }
+
+  .portal-kicker {
+    @apply text-xs uppercase tracking-[0.25em] text-emerald-300;
+  }
+
+  .portal-title {
+    @apply mt-1 text-3xl font-semibold text-slate-50 md:text-4xl;
+  }
+
+  .portal-subtitle {
+    @apply mt-2 text-sm text-slate-300;
+  }
+
+  .portal-error {
+    @apply rounded-lg border border-rose-400/50 bg-rose-400/10 px-4 py-3 text-sm text-rose-200;
+  }
+
+  .portal-grid {
+    @apply grid gap-4 md:grid-cols-2;
+  }
+
+  .portal-stack {
+    @apply space-y-4;
+  }
+
+  .portal-card {
+    @apply rounded-2xl border border-slate-700 bg-slate-900/90 p-5 shadow-lg;
+  }
+
+  .card-title {
+    @apply mb-3 text-xl font-semibold text-emerald-200;
+  }
+
+  .portal-form {
+    @apply space-y-3;
+  }
+
+  .portal-form label {
+    @apply block space-y-1 text-sm text-slate-200;
+  }
+
+  .portal-form input,
+  .portal-form textarea {
+    @apply w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-slate-100 outline-none;
+  }
+
+  .portal-form input:focus,
+  .portal-form textarea:focus {
+    @apply border-emerald-400 ring-2 ring-emerald-400/30;
+  }
+
+  .portal-actions {
+    @apply mt-3 flex flex-wrap gap-2;
+  }
+
+  .portal-btn {
+    @apply inline-flex items-center rounded-lg border border-slate-500 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .portal-btn-primary {
+    @apply border-emerald-500 bg-emerald-600 text-emerald-50 hover:bg-emerald-500;
+  }
+
+  .portal-btn-danger {
+    @apply border-rose-400 bg-rose-600 text-rose-50 hover:bg-rose-500;
+  }
+
+  .helper-text {
+    @apply text-xs text-slate-400;
+  }
+
+  .case-list {
+    @apply space-y-3;
+  }
+
+  .case-list li {
+    @apply rounded-lg border border-slate-700 bg-slate-800 p-3;
+  }
+
+  .case-list h3 {
+    @apply text-sm font-semibold text-slate-100;
+  }
+
+  .case-list p {
+    @apply mt-1 text-sm text-slate-300;
+  }
+
+  .case-list small {
+    @apply mt-2 block text-xs text-slate-400;
+  }
 }
