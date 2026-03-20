@@ -17,6 +17,7 @@
     "vite-plugin-solid": "^2.11.0"
   },
   "dependencies": {
+    "@netlify/blobs": "^10.7.0",
     "@solidjs/router": "^0.15.3",
     "@tailwindcss/vite": "^4.0.0",
     "solid-js": "^1.9.3"

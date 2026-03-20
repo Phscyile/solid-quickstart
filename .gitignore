@@ -4,7 +4,9 @@ dist
 .output
 .vercel
 .netlify
-netlify
+netlify/*
+!netlify/functions/
+!netlify/functions/**
 
 # dependencies
 /node_modules
